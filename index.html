@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="stylesheet"
+href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
 <meta charset="utf-8"/>
 
 <title>Sales Map</title>
@@ -36,8 +38,6 @@ transform:translateX(-50%) translateY(0);
 
 </head>
 
-<body>
-
 <div id="map"></div>
 
 <div id="propertyCard">
@@ -50,6 +50,8 @@ transform:translateX(-50%) translateY(0);
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 
 <script>
 
@@ -64,7 +66,19 @@ var propertyLatLng=[13.707,100.645];
 var house=L.marker(propertyLatLng).addTo(map);
 
 house.on('click',function(){
+  
+var bts=[13.719,100.645];
 
+L.Routing.control({
+waypoints:[
+L.latLng(propertyLatLng),
+L.latLng(bts)
+],
+routeWhileDragging:false,
+addWaypoints:false,
+draggableWaypoints:false,
+show:false
+}).addTo(map);
 map.flyTo(propertyLatLng,16,{
 duration:1.5
 });
