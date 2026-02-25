@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Project Map</title>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
+
+<style>
+#map{
+height:100vh;
+}
+
+#filter{
+position:absolute;
+top:10px;
+left:10px;
+z-index:1000;
+background:white;
+padding:8px;
+border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="filter">
+<select id="typeFilter">
+<option value="All">All</option>
+<option value="Detached">Detached</option>
+<option value="Townhome">Townhome</option>
+</select>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+<script>
+
+const sheetURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vQkOdRULyIfGZRazPhqFn4vQvsCBuxOC1SAEwwiiecwQ_GbFx8_aTCeWa8EqZLPphRGHOnClatbqeKt/pub?output=csv";
+
+var map=L.map("map").setView([13.75,100.55],11);
+
+L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+).addTo(map);
+
+let markers=[];
+
+fetch(sheetURL)
+.then(r=>r.text())
+.then(csv=>{
+
+const rows=csv.split("\n");
+const headers=rows[0].split(",");
+
+const latIndex=headers.indexOf("Latitude");
+const lngIndex=headers.indexOf("Longitude");
+const typeIndex=headers.indexOf("Type");
+const nameIndex=headers.indexOf("Project");
+const priceIndex=headers.indexOf("Price");
+const btsLatIndex=headers.indexOf("BTS_Lat");
+const btsLngIndex=headers.indexOf("BTS_Lng");
+
+rows.slice(1).forEach(row=>{
+
+const cols=row.split(",");
+
+const lat=parseFloat(cols[latIndex]);
+const lng=parseFloat(cols[lngIndex]);
+
+if(!lat||!lng)return;
+
+const marker=L.marker([lat,lng]).addTo(map);
+
+marker.projectType=cols[typeIndex];
+
+marker.bindPopup(`
+<b>${cols[nameIndex]}</b><br>
+🏠 ${cols[typeIndex]}<br>
+💰 ${cols[priceIndex]} MB<br>
+<button onclick="routeTo(${lat},${lng},
+${cols[btsLatIndex]},
+${cols[btsLngIndex]})">
+Route to BTS
+</button>
+`);
+
+markers.push(marker);
+
+});
+
+});
+
+let routeControl;
+
+function routeTo(lat,lng,btsLat,btsLng){
+
+if(routeControl){
+map.removeControl(routeControl);
+}
+
+routeControl=L.Routing.control({
+waypoints:[
+L.latLng(lat,lng),
+L.latLng(btsLat,btsLng)
+],
+routeWhileDragging:false
+}).addTo(map);
+
+}
+
+document.getElementById("typeFilter")
+.addEventListener("change",e=>{
+
+const type=e.target.value;
+
+markers.forEach(m=>{
+
+if(type==="All"||
+m.projectType===type){
+map.addLayer(m);
+}else{
+map.removeLayer(m);
+}
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
