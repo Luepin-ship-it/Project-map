@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet"
-href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
+
 <meta charset="utf-8"/>
 
 <title>Sales Map</title>
 
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
 
 <style>
 
@@ -66,19 +68,7 @@ var propertyLatLng=[13.707,100.645];
 var house=L.marker(propertyLatLng).addTo(map);
 
 house.on('click',function(){
-  
-var bts=[13.719,100.645];
 
-L.Routing.control({
-waypoints:[
-L.latLng(propertyLatLng),
-L.latLng(bts)
-],
-routeWhileDragging:false,
-addWaypoints:false,
-draggableWaypoints:false,
-show:false
-}).addTo(map);
 map.flyTo(propertyLatLng,16,{
 duration:1.5
 });
@@ -86,6 +76,30 @@ duration:1.5
 document
 .getElementById("propertyCard")
 .classList.add("show");
+
+// ===== ROUTE START =====
+
+var bts=[13.719,100.645];
+
+L.Routing.control({
+
+router:L.Routing.osrmv1({
+serviceUrl:'https://router.project-osrm.org/route/v1'
+}),
+
+waypoints:[
+L.latLng(propertyLatLng[0],propertyLatLng[1]),
+L.latLng(bts[0],bts[1])
+],
+
+routeWhileDragging:false,
+addWaypoints:false,
+draggableWaypoints:false,
+createMarker:function(){return null;}
+
+}).addTo(map);
+
+// ===== ROUTE END =====
 
 });
 
