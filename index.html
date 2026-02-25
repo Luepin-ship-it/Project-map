@@ -1,108 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta charset="utf-8"/>
 
-<title>Sales Map</title>
+<title>Sales Project Map</title>
 
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
-
 <style>
+body{
+  margin:0;
+}
 
 #map{
-height:100vh;
+  height:100vh;
 }
-
-#propertyCard{
-position:absolute;
-bottom:30px;
-left:50%;
-transform:translateX(-50%) translateY(200px);
-width:320px;
-background:white;
-padding:15px;
-border-radius:15px;
-box-shadow:0 20px 40px rgba(0,0,0,0.3);
-transition:0.6s;
-z-index:999;
-}
-
-#propertyCard.show{
-transform:translateX(-50%) translateY(0);
-}
-
 </style>
-
 </head>
+
+<body>
 
 <div id="map"></div>
 
-<div id="propertyCard">
-<h3>Nirvana Define</h3>
-<p>🏡 บ้านเดี่ยว 3 ห้องนอน</p>
-<p>💰 8.9 ล้านบาท</p>
-<p>🚆 BTS ศรีนครินทร์ 2.1km</p>
-<p>🏫 เตรียมน้อม 1.5km</p>
-<p>🏥 สมิติเวช 3km</p>
-</div>
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 
 <script>
 
-var map=L.map('map').setView([13.7367,100.5231],12);
+// ===============================
+// ✅ CREATE MAP
+// ===============================
+
+var map = L.map('map').setView([13.7367,100.5231],11);
 
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 ).addTo(map);
 
-fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQkOdRULyIfGZRazPhqFn4vQvsCBuxOC1SAEwwiiecwQ_GbFx8_aTCeWa8EqZLPphRGHOnClatbqeKt/pub?output=csv")
+
+// ===============================
+// ✅ GOOGLE SHEET CSV
+// ===============================
+
+const sheetURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vQkOdRULyIfGZRazPhqFn4vQvsCBuxOC1SAEwwiiecwQ_GbFx8_aTCeWa8EqZLPphRGHOnClatbqeKt/pub?output=csv";
+
+
+// ===============================
+// ✅ LOAD DATA FROM SHEET
+// ===============================
+
+fetch(sheetURL)
 .then(res => res.text())
 .then(csv => {
 
-  const rows = csv.split("\r?\n");
-  const headers = rows[0].split(",");
+const rows = csv.split("\n");
+const headers = rows[0].split(",");
 
-  const latIndex = headers.indexOf("Latitude");
-  const lngIndex = headers.indexOf("Longitude");
+// หา column อัตโนมัติ
+const nameIndex = headers.indexOf("Project");
+const typeIndex = headers.indexOf("Type");
+const priceIndex = headers.indexOf("Min Price");
+const latIndex = headers.indexOf("Latitude");
+const lngIndex = headers.indexOf("Longitude");
 
-  rows.slice(1).forEach(row => {
+rows.slice(1).forEach(row => {
 
-    const cols = row.split(",");
+const cols = row.split(",");
 
-    const name = cols[0];
-    const type = cols[2];
-    const price = cols[3];
+const name = cols[nameIndex];
+const type = cols[typeIndex];
+const price = cols[priceIndex];
 
-    const lat = parseFloat(cols[latIndex]);
-    const lng = parseFloat(cols[lngIndex]);
+const lat = parseFloat(cols[latIndex]);
+const lng = parseFloat(cols[lngIndex]);
 
-    if(!lat || !lng) return;
+if(!lat || !lng) return;
 
-    var marker = L.marker([lat,lng]).addTo(map);
 
-    marker.bindPopup(`
-      <b>${name}</b><br>
-      🏠 ${type}<br>
-      💰 ${price} MB
-           );
-    });
+// ===============================
+// ✅ CREATE MARKER
+// ===============================
 
-});   // forEach
-});   // then(csv)
-});   // fetch ⭐
+var marker = L.marker([lat,lng]).addTo(map);
 
-</script>
+marker.bindPopup(`
+<b>${name}</b><br>
+🏠 ${type}<br>
+💰 ${price} MB
+`);
 
-</body>
-</html>
+});
+
+});
 
 </script>
 
