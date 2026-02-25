@@ -64,36 +64,39 @@ L.tileLayer(
 ).addTo(map);
 
 fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQkOdRULyIfGZRazPhqFn4vQvsCBuxOC1SAEwwiiecwQ_GbFx8_aTCeWa8EqZLPphRGHOnClatbqeKt/pub?output=csv")
-.then(res=>res.text())
-.then(csv=>{
-const rows=csv.split(/\r?\n/);
-const headers=rows[0].split(",");
+.then(res => res.text())
+.then(csv => {
 
-const latIndex=headers.indexOf("Latitude");
-const lngIndex=headers.indexOf("Longitude");
+  const rows = csv.split("\r?\n");
+  const headers = rows[0].split(",");
 
-rows.slice(1).forEach(row=>{
+  const latIndex = headers.indexOf("Latitude");
+  const lngIndex = headers.indexOf("Longitude");
 
-const cols=row.split(",");
+  rows.slice(1).forEach(row => {
 
-const name=cols[0];
-const type=cols[2];
-const price=cols[3];
+    const cols = row.split(",");
 
-const lat=parseFloat(cols[latIndex]);
-const lng=parseFloat(cols[lngIndex]);
+    const name = cols[0];
+    const type = cols[2];
+    const price = cols[3];
 
-if(!lat||!lng)return;
+    const lat = parseFloat(cols[latIndex]);
+    const lng = parseFloat(cols[lngIndex]);
 
-var marker=L.marker([lat,lng]).addTo(map);
+    if(!lat || !lng) return;
 
-marker.bindPopup(`
-<b>${name}</b><br>
-🏠 ${type}<br>
-💰 ${price} MB
-`);
+    var marker = L.marker([lat,lng]).addTo(map);
 
-});
+    marker.bindPopup(`
+      <b>${name}</b><br>
+      🏠 ${type}<br>
+      💰 ${price} MB
+    `);
+
+  });
+
+});   // ✅ ปิด then(csv=>{
 
 </script>
 
