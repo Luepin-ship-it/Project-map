@@ -57,49 +57,41 @@ transform:translateX(-50%) translateY(0);
 
 <script>
 
-var map = L.map('map').setView([13.7367,100.5231],12);
+var map=L.map('map').setView([13.7367,100.5231],12);
 
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 ).addTo(map);
 
-var propertyLatLng=[13.707,100.645];
+fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQkOdRULyIfGZRazPhqFn4vQvsCBuxOC1SAEwwiiecwQ_GbFx8_aTCeWa8EqZLPphRGHOnClatbqeKt/pub?output=csv")
+.then(res=>res.text())
+.then(csv=>{
+const rows=csv.split(/\r?\n/);
+const headers=rows[0].split(",");
 
-var house=L.marker(propertyLatLng).addTo(map);
+const latIndex=headers.indexOf("Latitude");
+const lngIndex=headers.indexOf("Longitude");
 
-house.on('click',function(){
+rows.slice(1).forEach(row=>{
 
-map.flyTo(propertyLatLng,16,{
-duration:1.5
-});
+const cols=row.split(",");
 
-document
-.getElementById("propertyCard")
-.classList.add("show");
+const name=cols[0];
+const type=cols[2];
+const price=cols[3];
 
-// ===== ROUTE START =====
+const lat=parseFloat(cols[latIndex]);
+const lng=parseFloat(cols[lngIndex]);
 
-var bts=[13.719,100.645];
+if(!lat||!lng)return;
 
-L.Routing.control({
+var marker=L.marker([lat,lng]).addTo(map);
 
-router:L.Routing.osrmv1({
-serviceUrl:'https://router.project-osrm.org/route/v1'
-}),
-
-waypoints:[
-L.latLng(propertyLatLng[0],propertyLatLng[1]),
-L.latLng(bts[0],bts[1])
-],
-
-routeWhileDragging:false,
-addWaypoints:false,
-draggableWaypoints:false,
-createMarker:function(){return null;}
-
-}).addTo(map);
-
-// ===== ROUTE END =====
+marker.bindPopup(`
+<b>${name}</b><br>
+🏠 ${type}<br>
+💰 ${price} MB
+`);
 
 });
 
